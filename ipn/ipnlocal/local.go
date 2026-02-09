@@ -4154,7 +4154,7 @@ func (b *LocalBackend) checkPrefsLocked(p *ipn.Prefs) error {
 	if err := b.checkAutoUpdatePrefsLocked(p); err != nil {
 		errs = append(errs, err)
 	}
-	if err := b.checkAdvertiseRoutesLocked(p); err != nil {
+	if err := validateAdvertiseRoutes(p); err != nil {
 		errs = append(errs, err)
 	}
 	return errors.Join(errs...)
@@ -4283,9 +4283,9 @@ func (b *LocalBackend) checkAutoUpdatePrefsLocked(p *ipn.Prefs) error {
 	return nil
 }
 
-// checkAdvertiseRoutesLocked validates that all advertised routes have
+// validateAdvertiseRoutes validates that all advertised routes have
 // properly masked prefixes (no non-address bits set).
-func (b *LocalBackend) checkAdvertiseRoutesLocked(p *ipn.Prefs) error {
+func validateAdvertiseRoutes(p *ipn.Prefs) error {
 	for _, route := range p.AdvertiseRoutes {
 		if route != route.Masked() {
 			return fmt.Errorf("route %s has non-address bits set; expected %s", route, route.Masked())
