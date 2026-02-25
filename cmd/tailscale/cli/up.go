@@ -762,7 +762,16 @@ func runUp(ctx context.Context, cmd string, args []string, upArgs upArgsT) (retE
 						outln(string(data))
 					}
 				} else {
-					fmt.Fprintf(Stderr, "\nTo authenticate, visit:\n\n\t%s\n\n", authURL)
+					runningAsRoot := os.Getuid() == 0
+					if openURL, ok := hookOpenURL.GetOk(); ok && !runningAsRoot {
+						if err := openURL(authURL); err == nil {
+							fmt.Fprintf(Stderr, "\nComplete the authentication in your browser window.\nOr visit %s\n\n", authURL)
+						} else {
+							fmt.Fprintf(Stderr, "\nTo authenticate, visit:\n\n\t%s\n\n", authURL)
+						}
+					} else {
+						fmt.Fprintf(Stderr, "\nTo authenticate, visit:\n\n\t%s\n\n", authURL)
+					}
 					if upArgs.qr && buildfeatures.HasQRCodes {
 						_, err := qrcodes.Fprintln(Stderr, qrcodes.Format(upArgs.qrFormat), authURL)
 						if err != nil {
