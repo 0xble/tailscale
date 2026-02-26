@@ -510,9 +510,7 @@ func runDerpProbeQueuingDelayContinously(ctx context.Context, from, to *tailcfg.
 	pkt := make([]byte, 260) // the same size as a CallMeMaybe packet observed on a Tailscale client.
 	crand.Read(pkt)
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		t := time.NewTicker(time.Second / time.Duration(packetsPerSecond))
 		defer t.Stop()
 
@@ -545,13 +543,11 @@ func runDerpProbeQueuingDelayContinously(ctx context.Context, from, to *tailcfg.
 				}
 			}
 		}
-	}()
+	})
 
 	// Receive the packets.
 	recvFinishedC := make(chan error, 1)
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		defer close(recvFinishedC) // to break out of 'select' below.
 		fromDERPPubKey := fromc.SelfPublicKey()
 		for {
@@ -582,7 +578,7 @@ func runDerpProbeQueuingDelayContinously(ctx context.Context, from, to *tailcfg.
 				// Loop.
 			}
 		}
-	}()
+	})
 
 	select {
 	case <-ctx.Done():
