@@ -10,7 +10,7 @@ import (
 	"sync"
 )
 
-const forkVersionSuffix = "-0xble"
+const forkVersionSuffix = "-0xble.1.1.0"
 
 func withForkVersionSuffix(v string) string {
 	if strings.HasSuffix(v, forkVersionSuffix) {
